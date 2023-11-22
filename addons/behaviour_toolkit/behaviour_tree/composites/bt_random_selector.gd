@@ -8,6 +8,7 @@ var current_leaf: int = 0
 
 
 func tick(actor: Node, blackboard: Blackboard):
+	print("Rand Selector works?")
 	if not is_shuffled:
 		leaves.shuffle()
 

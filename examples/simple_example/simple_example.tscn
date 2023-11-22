@@ -1,0 +1,124 @@
+[gd_scene load_steps=17 format=3 uid="uid://by5dp7cb0pqp1"]
+
+[ext_resource type="Script" path="res://examples/simple_example/simple_example.gd" id="1_eweb6"]
+[ext_resource type="Texture2D" uid="uid://cnjtcqmw1tee" path="res://examples/assets/actors/tiny_crab.png" id="2_3uoq7"]
+[ext_resource type="Script" path="res://examples/simple_example/behaviours_gallery.gd" id="2_omd18"]
+[ext_resource type="Texture2D" uid="uid://bqmwkipw1o70p" path="res://examples/assets/actors/tiny_ghost.png" id="3_1jh88"]
+[ext_resource type="Resource" uid="uid://ubeqtpqal1oq" path="res://examples/simple_example/simple_example_blackboard.tres" id="3_7yhkr"]
+[ext_resource type="Script" path="res://examples/simple_example/state_1.gd" id="4_3cm3v"]
+[ext_resource type="Texture2D" uid="uid://btxqb42k83r5o" path="res://examples/assets/actors/tiny_evil wizard.png" id="4_hvhfw"]
+[ext_resource type="Texture2D" uid="uid://bgflndmud3o7t" path="res://examples/assets/actors/tiny_goohst.png" id="5_8utyp"]
+[ext_resource type="Script" path="res://addons/behaviour_toolkit/finite_state_machine/fsm_transition.gd" id="5_x7jdn"]
+[ext_resource type="Script" path="res://addons/behaviour_toolkit/finite_state_machine/fsm_state_integrated_bt.gd" id="8_nm3si"]
+[ext_resource type="Script" path="res://addons/behaviour_toolkit/behaviour_tree/bt_root.gd" id="9_ukknc"]
+[ext_resource type="Script" path="res://addons/behaviour_toolkit/behaviour_tree/composites/bt_sequence.gd" id="10_ihsd6"]
+[ext_resource type="Script" path="res://addons/behaviour_toolkit/behaviour_tree/leaves/leaf_print.gd" id="11_640n7"]
+[ext_resource type="Script" path="res://addons/behaviour_toolkit/behaviour_tree/composites/bt_selector.gd" id="11_b7501"]
+[ext_resource type="Script" path="res://addons/behaviour_toolkit/behaviour_tree/decorators/decorator_limiter.gd" id="12_csqy5"]
+[ext_resource type="Script" path="res://examples/simple_example/behaviours_gallery_scripts/rotate_sprite.gd" id="12_pr88k"]
+
+[node name="SimpleExample" type="Node2D"]
+script = ExtResource("1_eweb6")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(306, 266)
+scale = Vector2(8, 8)
+texture = ExtResource("2_3uoq7")
+
+[node name="Sprite2D2" type="Sprite2D" parent="."]
+position = Vector2(645, 266)
+scale = Vector2(8, 8)
+texture = ExtResource("3_1jh88")
+
+[node name="Sprite2D3" type="Sprite2D" parent="."]
+position = Vector2(306, 474)
+scale = Vector2(8, 8)
+texture = ExtResource("4_hvhfw")
+
+[node name="Sprite2D4" type="Sprite2D" parent="."]
+position = Vector2(645, 474)
+scale = Vector2(8, 8)
+texture = ExtResource("5_8utyp")
+
+[node name="ex_behaviours_gallery" type="Node" parent="." node_paths=PackedStringArray("initial_state", "actor")]
+editor_description = "Nodes with \"ex_\" prefix are Extended Scripts."
+script = ExtResource("2_omd18")
+autostart = true
+initial_state = NodePath("ex_state_1")
+actor = NodePath("..")
+blackboard = ExtResource("3_7yhkr")
+
+[node name="ex_state_1" type="Node" parent="ex_behaviours_gallery"]
+script = ExtResource("4_3cm3v")
+
+[node name="go_state_2" type="Node" parent="ex_behaviours_gallery/ex_state_1" node_paths=PackedStringArray("next_state")]
+script = ExtResource("5_x7jdn")
+next_state = NodePath("../../state_2")
+use_event = true
+event = "transition_state"
+
+[node name="state_2" type="Node" parent="ex_behaviours_gallery"]
+script = ExtResource("8_nm3si")
+
+[node name="BTRoot" type="Node" parent="ex_behaviours_gallery/state_2"]
+script = ExtResource("9_ukknc")
+
+[node name="BTSequence" type="Node" parent="ex_behaviours_gallery/state_2/BTRoot"]
+script = ExtResource("10_ihsd6")
+
+[node name="ex_rotate_sprite" type="Node" parent="ex_behaviours_gallery/state_2/BTRoot/BTSequence" node_paths=PackedStringArray("node2d")]
+script = ExtResource("12_pr88k")
+node2d = NodePath("../../../../../Sprite2D3")
+
+[node name="ex_rotate_sprite2" type="Node" parent="ex_behaviours_gallery/state_2/BTRoot/BTSequence" node_paths=PackedStringArray("node2d")]
+script = ExtResource("12_pr88k")
+node2d = NodePath("../../../../../Sprite2D4")
+
+[node name="go_state_3" type="Node" parent="ex_behaviours_gallery/state_2" node_paths=PackedStringArray("next_state")]
+script = ExtResource("5_x7jdn")
+next_state = NodePath("../../state_3")
+use_event = true
+event = "transition_state"
+
+[node name="state_3" type="Node" parent="ex_behaviours_gallery"]
+script = ExtResource("8_nm3si")
+
+[node name="go_state_1" type="Node" parent="ex_behaviours_gallery/state_3" node_paths=PackedStringArray("next_state")]
+script = ExtResource("5_x7jdn")
+next_state = NodePath("../../ex_state_1")
+use_event = true
+event = "transition_state"
+
+[node name="BTRoot" type="Node" parent="ex_behaviours_gallery/state_3"]
+script = ExtResource("9_ukknc")
+
+[node name="BTSelector" type="Node" parent="ex_behaviours_gallery/state_3/BTRoot"]
+script = ExtResource("11_b7501")
+
+[node name="BTSequence" type="Node" parent="ex_behaviours_gallery/state_3/BTRoot/BTSelector"]
+script = ExtResource("10_ihsd6")
+
+[node name="BTLimiter" type="Node" parent="ex_behaviours_gallery/state_3/BTRoot/BTSelector/BTSequence"]
+script = ExtResource("12_csqy5")
+on_limit = 0
+
+[node name="LeafPrint" type="Node" parent="ex_behaviours_gallery/state_3/BTRoot/BTSelector/BTSequence/BTLimiter"]
+script = ExtResource("11_640n7")
+custom_text = "Hello from BTree"
+
+[node name="BTLimiter2" type="Node" parent="ex_behaviours_gallery/state_3/BTRoot/BTSelector/BTSequence"]
+script = ExtResource("12_csqy5")
+limit = 100
+
+[node name="ex_rotate_sprite" type="Node" parent="ex_behaviours_gallery/state_3/BTRoot/BTSelector/BTSequence/BTLimiter2" node_paths=PackedStringArray("node2d")]
+script = ExtResource("12_pr88k")
+node2d = NodePath("../../../../../../../Sprite2D")
+
+[node name="BTSequence2" type="Node" parent="ex_behaviours_gallery/state_3/BTRoot/BTSelector"]
+script = ExtResource("10_ihsd6")
+
+[node name="ex_rotate_sprite" type="Node" parent="ex_behaviours_gallery/state_3/BTRoot/BTSelector/BTSequence2" node_paths=PackedStringArray("node2d")]
+script = ExtResource("12_pr88k")
+node2d = NodePath("../../../../../../Sprite2D2")
+
+[connection signal="state_changed" from="ex_behaviours_gallery" to="ex_behaviours_gallery" method="_on_state_changed"]
